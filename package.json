@@ -1,0 +1,48 @@
+{
+  "name": "supajob-api",
+  "version": "0.0.0",
+  "description": "API for the SupaJob application",
+  "author": "Fancy Software <fancysoft.eth>",
+  "license": "UNLICENSED",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc && resolve-tspaths",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon",
+    "start": "node dist/index.js",
+    "migrate": "pnpm run build && node dist/scripts/migrate.js"
+  },
+  "dependencies": {
+    "@ethersproject/contracts": "^5.7.0",
+    "@ethersproject/providers": "^5.7.2",
+    "@koa/cors": "^3.3.0",
+    "@koa/router": "^10.1.1",
+    "better-sqlite3": "^8.0.1",
+    "dotenv": "^16.0.0",
+    "ethers": "^5.7.2",
+    "json-rpc-2.0": "^1.4.1",
+    "jsonwebtoken": "^8.5.1",
+    "koa": "^2.13.4",
+    "koa-bodyparser": "^4.3.0",
+    "koa-busboy": "^1.2.0",
+    "koa-logger": "^3.2.1",
+    "multiformats": "^9.6.4",
+    "nanoid": "^4.0.0",
+    "node-fetch": "^3.3.0",
+    "web3-token": "^1.0.2"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.3",
+    "@types/jsonwebtoken": "^8.5.9",
+    "@types/koa": "^2.13.5",
+    "@types/koa-bodyparser": "^4.3.10",
+    "@types/koa-logger": "^3.1.2",
+    "@types/koa__cors": "^3.3.0",
+    "@types/koa__router": "^12.0.0",
+    "@types/node": "^18.11.9",
+    "nodemon": "^2.0.20",
+    "resolve-tspaths": "^0.8.3",
+    "typescript": "^4.9.3"
+  }
+}
