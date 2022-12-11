@@ -13,7 +13,7 @@ CREATE TABLE job_board_mint_fresh (
 ALTER TABLE
   [state]
 ADD
-  COLUMN job_board_mint_fresh_block BIGINT;
+  job_board_mint_fresh_block BIGINT;
 
 CREATE INDEX idx_job_board_mint_fresh_contract_address ON job_board_mint_fresh (contract_address);
 

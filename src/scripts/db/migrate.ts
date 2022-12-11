@@ -2,16 +2,27 @@ import { open } from "@/services/db.js";
 import fs from "fs";
 import path from "path";
 
+const MIGRATION_TABLE = "_migrations";
+
 export async function migrate(to?: number, dir: string = "./db/migrations") {
-  const db = await open(true);
+  const db = open(true);
   let from: number;
 
-  try {
-    from = db.prepare(`SELECT migration FROM [state]`).pluck().get();
-  } catch (e) {
-    console.log(e);
-    from = 0;
-  }
+  db.exec(`CREATE TABLE IF NOT EXISTS ${MIGRATION_TABLE} (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)`);
+
+  from =
+    (db
+      .prepare(
+        `SELECT id
+      FROM ${MIGRATION_TABLE}
+      ORDER BY id DESC
+      LIMIT 1`
+      )
+      .pluck()
+      .get() as number) || 0;
 
   const dirPath = path.join(process.cwd(), dir);
   const fileNames = fs.readdirSync(dirPath);
@@ -29,19 +40,23 @@ export async function migrate(to?: number, dir: string = "./db/migrations") {
   }
 
   const updateMigrationStmt = db.prepare(
-    `UPDATE [state] SET migration = ?, migrated_at = CURRENT_TIMESTAMP`
+    `INSERT INTO ${MIGRATION_TABLE} (name) VALUES (?)`
   );
 
-  for (const [fileName, i] of fileNames.slice(from, to)) {
+  let i = 0;
+  for (const fileName of fileNames.slice(from, to)) {
     console.log(`Running migration ${from + i} -> ${from + 1 + i}...`);
     const sql = fs.readFileSync(`${dir}/${fileName}`, "utf8");
+
     db.transaction(() => {
       db.exec(sql);
-      updateMigrationStmt.run(from + 1 + i);
-    });
+      updateMigrationStmt.run(fileName);
+    })();
+
+    i++;
   }
 
-  console.log(`Successfully run ${from - to} migrations`);
+  console.log(`Successfully run ${to - from} migrations`);
   process.exit(0);
 }
 

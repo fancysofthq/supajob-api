@@ -69,8 +69,8 @@ export class Transfer extends Event {
         event.operator.toString(),
         event.from.toString(),
         event.to.toString(),
-        event.id.toString(),
-        event.value.toString()
+        event.id._hex,
+        event.value._hex
       );
     }
   }

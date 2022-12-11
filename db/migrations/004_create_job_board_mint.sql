@@ -11,7 +11,7 @@ CREATE TABLE job_board_mint (
 ALTER TABLE
   [state]
 ADD
-  COLUMN job_board_mint_block BIGINT;
+  job_board_mint_block BIGINT;
 
 CREATE INDEX idx_job_board_mint_contract_address ON job_board_mint (contract_address);
 

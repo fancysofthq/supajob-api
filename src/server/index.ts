@@ -6,6 +6,7 @@ import koaBodyparser from "koa-bodyparser";
 import koaLogger from "koa-logger";
 import setupAuthController from "./controllers/auth.js";
 import setupStorageController from "./controllers/storage.js";
+import setupJobsController from "./controllers/jobs.js";
 import fs from "fs";
 import config from "@/config.js";
 
@@ -18,6 +19,7 @@ router.get("/", (ctx) => {
 
 setupAuthController(router);
 setupStorageController(router);
+setupJobsController(router);
 
 app
   .use(koaLogger())

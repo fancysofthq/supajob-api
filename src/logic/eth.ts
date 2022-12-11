@@ -1,15 +1,17 @@
 import config from "../config.js";
 import { ethers } from "ethers";
 import { JobBoardFactory } from "@/contracts/JobBoardFactory.js";
-import { syncEvents } from "./EventDB.js";
+import * as EventDB from "./EventDB.js";
 import { Transfer } from "@/models/JobBoard/events/Transfer.js";
 import { Mint } from "@/models/JobBoard/events/Mint.js";
 import { MintFresh } from "@/models/JobBoard/events/MintFresh.js";
 import * as db from "@/services/db.js";
+import { timeout } from "@/utils.js";
 
-export async function sync(cancel: () => boolean) {
+export async function syncEvents(cancel: () => boolean) {
+  console.log("Connecting to JSON-RPC provider at", config.eth.rpcUrl);
   const provider = new ethers.providers.JsonRpcProvider(config.eth.rpcUrl);
-  console.debug("Connecting to wallet provider");
+  await timeout(1000, provider.ready, "Provider not ready");
   const blockNumber = await provider.getBlockNumber();
   console.log("Current block number:", blockNumber);
   await Promise.all([syncJobBoard(provider, cancel)]);
@@ -29,8 +31,8 @@ export async function syncJobBoard(
   if (!deployBlock) throw new Error("JobBoard deploy block not found");
 
   await Promise.all([
-    syncEvents<Transfer>(
-      await db.open(),
+    EventDB.syncEvents<Transfer>(
+      db.open(),
       Transfer.BLOCK_SINGLE_COLUMN,
       15 * 1000,
       cancel,
@@ -41,8 +43,8 @@ export async function syncJobBoard(
       Transfer.insertBulk
     ),
 
-    syncEvents<Transfer>(
-      await db.open(),
+    EventDB.syncEvents<Transfer>(
+      db.open(),
       Transfer.BLOCK_BATCH_COLUMN,
       15 * 1000,
       cancel,
@@ -53,8 +55,8 @@ export async function syncJobBoard(
       Transfer.insertBulk
     ),
 
-    syncEvents<Mint>(
-      await db.open(),
+    EventDB.syncEvents<Mint>(
+      db.open(),
       Mint.BLOCK_COLUMN,
       15 * 1000,
       cancel,
@@ -65,8 +67,8 @@ export async function syncJobBoard(
       Mint.insertBulk
     ),
 
-    syncEvents<MintFresh>(
-      await db.open(),
+    EventDB.syncEvents<MintFresh>(
+      db.open(),
       MintFresh.BLOCK_COLUMN,
       15 * 1000,
       cancel,

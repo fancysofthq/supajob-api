@@ -11,13 +11,14 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon",
     "start": "node dist/index.js",
-    "migrate": "pnpm run build && node dist/scripts/migrate.js"
+    "db:migrate": "pnpm run build && node dist/scripts/migrate.js"
   },
   "dependencies": {
     "@ethersproject/contracts": "^5.7.0",
     "@ethersproject/providers": "^5.7.2",
     "@koa/cors": "^3.3.0",
     "@koa/router": "^10.1.1",
+    "@multiformats/sha3": "^2.0.14",
     "better-sqlite3": "^8.0.1",
     "dotenv": "^16.0.0",
     "ethers": "^5.7.2",
@@ -27,9 +28,10 @@
     "koa-bodyparser": "^4.3.0",
     "koa-busboy": "^1.2.0",
     "koa-logger": "^3.2.1",
-    "multiformats": "^9.6.4",
+    "multiformats": "^10.0",
     "nanoid": "^4.0.0",
     "node-fetch": "^3.3.0",
+    "p-retry": "^5.1.2",
     "web3-token": "^1.0.2"
   },
   "devDependencies": {

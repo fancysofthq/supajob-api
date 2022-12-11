@@ -1,6 +1,7 @@
 import { Database } from "better-sqlite3";
 import { ethers } from "ethers";
 import { timer } from "@/utils.js";
+import pRetry, { AbortError } from "p-retry";
 
 export async function syncEvents<T>(
   db: Database,
@@ -64,7 +65,7 @@ async function syncPastEvents<T>(
   while (!pollCancel()) {
     const [latestSyncedBlock, currentBlock] = await Promise.all([
       ((await selectBlockColumnStmt.get()) as number) || contractDeployBlock,
-      contract.provider.getBlockNumber(),
+      await pRetry(() => contract.provider.getBlockNumber()),
     ]);
 
     const diff = currentBlock - latestSyncedBlock;
@@ -73,10 +74,8 @@ async function syncPastEvents<T>(
     if (delta > 0) {
       const untilBlock = latestSyncedBlock + delta;
 
-      const rawEvents = await contract.queryFilter(
-        filter,
-        latestSyncedBlock,
-        untilBlock
+      const rawEvents = await pRetry(() =>
+        contract.queryFilter(filter, latestSyncedBlock, untilBlock)
       );
 
       const mappedEvents = rawEvents.flatMap(parseRaw);
@@ -91,7 +90,7 @@ async function syncPastEvents<T>(
 
         insertBulk(db, mappedEvents);
         updateBlockColumnStmt.run(untilBlock);
-      });
+      })();
     }
 
     if (delta == diff) await timer(pollInterval);

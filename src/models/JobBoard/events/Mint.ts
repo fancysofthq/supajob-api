@@ -38,8 +38,8 @@ export class Mint extends Event {
         event.logIndex,
         event.transactionHash,
         event.contract.toString(),
-        event.id.toString(),
-        event.value.toString()
+        event.id._hex,
+        event.value._hex
       );
     }
   }

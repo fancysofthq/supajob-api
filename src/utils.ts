@@ -42,3 +42,17 @@ function streamToBuffer(stream: Stream): Promise<Buffer> {
 export async function timer(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+export async function timeout(
+  ms: number,
+  promise: Promise<any>,
+  errorMsg?: string
+) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      reject(new Error(errorMsg || "Timeout"));
+    }, ms);
+
+    promise.then(resolve, reject);
+  });
+}

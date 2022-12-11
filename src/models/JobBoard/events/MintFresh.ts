@@ -5,6 +5,7 @@ import { Database } from "better-sqlite3";
 
 export class MintFresh extends Event {
   static BLOCK_COLUMN = "job_board_mint_fresh_block";
+  static TABLE = "job_board_mint_fresh";
 
   static parse(event: ethers.Event): MintFresh[] {
     return [
@@ -23,7 +24,7 @@ export class MintFresh extends Event {
 
   static insertBulk(db: Database, events: MintFresh[]): void {
     const stmt = db.prepare(
-      `INSERT INTO job_board_mint_fresh (
+      `INSERT INTO ${MintFresh.TABLE} (
         block_number,
         log_index,
         tx_hash,
@@ -42,10 +43,10 @@ export class MintFresh extends Event {
         event.logIndex,
         event.transactionHash,
         event.contract.toString(),
-        event.id.toString(),
+        event.id._hex,
         event.codec,
         event.author.toString(),
-        event.value.toString()
+        event.value._hex
       );
     }
   }

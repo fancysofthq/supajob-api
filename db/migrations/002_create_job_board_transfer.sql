@@ -15,9 +15,12 @@ CREATE TABLE job_board_transfer (
 ALTER TABLE
   [state]
 ADD
-  COLUMN job_board_transfer_single_block BIGINT
+  job_board_transfer_single_block BIGINT;
+
+ALTER TABLE
+  [state]
 ADD
-  COLUMN job_board_transfer_batch_block BIGINT;
+  job_board_transfer_batch_block BIGINT;
 
 CREATE INDEX idx_job_board_transfer_contract_address ON job_board_transfer (contract_address);
 
