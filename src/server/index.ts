@@ -7,6 +7,7 @@ import koaLogger from "koa-logger";
 import setupAuthController from "./controllers/auth.js";
 import setupStorageController from "./controllers/storage.js";
 import fs from "fs";
+import config from "@/config.js";
 
 const app = new Koa();
 const router = new Router();
@@ -27,8 +28,8 @@ app
 
 export default http2.createSecureServer(
   {
-    key: fs.readFileSync("server.key"),
-    cert: fs.readFileSync("server.cert"),
+    cert: fs.readFileSync(config.server.certPath),
+    key: fs.readFileSync(config.server.keyPath),
   },
   app.callback()
 );

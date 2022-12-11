@@ -7,7 +7,12 @@ class DB {
 }
 
 class Server {
-  constructor(readonly host: string, readonly port: number) {}
+  constructor(
+    readonly certPath: string,
+    readonly keyPath: string,
+    readonly host: string,
+    readonly port: number
+  ) {}
 }
 
 class Eth {
@@ -35,7 +40,12 @@ function requireEnv(id: string): string {
 
 const config = new Config(
   new DB(new URL(requireEnv("DATABASE_URL"))),
-  new Server(requireEnv("HOST"), parseInt(requireEnv("PORT"))),
+  new Server(
+    requireEnv("SERVER_CERT"),
+    requireEnv("SERVER_KEY"),
+    requireEnv("SERVER_HOST"),
+    parseInt(requireEnv("SERVER_PORT"))
+  ),
   requireEnv("JWT_SECRET"),
   requireEnv("WEB3_STORAGE_TOKEN"),
   new Eth(
