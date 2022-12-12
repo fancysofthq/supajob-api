@@ -2,7 +2,11 @@
   "name": "supajob-api",
   "version": "0.1.0",
   "description": "API for the SupaJob application",
-  "author": "Fancy Software <fancysoft.eth>",
+  "author": {
+    "name": "Fancy Software",
+    "url": "http://fancysoft.eth"
+  },
+  "repository": "git+https://github.com/fancysofthq/supajob-api.git",
   "license": "UNLICENSED",
   "main": "index.js",
   "type": "module",
