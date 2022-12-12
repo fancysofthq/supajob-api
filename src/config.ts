@@ -8,7 +8,7 @@ class DB {
 
 class Server {
   constructor(
-    readonly certPath: string,
+    readonly crtPath: string,
     readonly keyPath: string,
     readonly host: string,
     readonly port: number
@@ -41,7 +41,7 @@ function requireEnv(id: string): string {
 const config = new Config(
   new DB(new URL(requireEnv("DATABASE_URL"))),
   new Server(
-    requireEnv("SERVER_CERT"),
+    requireEnv("SERVER_CRT"),
     requireEnv("SERVER_KEY"),
     requireEnv("SERVER_HOST"),
     parseInt(requireEnv("SERVER_PORT"))

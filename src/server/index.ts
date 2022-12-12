@@ -30,7 +30,7 @@ app
 
 export default http2.createSecureServer(
   {
-    cert: fs.readFileSync(config.server.certPath),
+    cert: fs.readFileSync(config.server.crtPath),
     key: fs.readFileSync(config.server.keyPath),
   },
   app.callback()

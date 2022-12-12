@@ -4,5 +4,5 @@ node_modules
 dist
 .env
 
-server.cert
+server.crt
 server.key
