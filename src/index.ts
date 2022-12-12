@@ -6,5 +6,9 @@ let cancel = false;
 
 syncEvents(() => cancel);
 
-console.log(`Listening at http://${config.server.host}:${config.server.port}`);
+console.log(
+  `Listening at http${config.server.credentials ? "s" : ""}://${
+    config.server.host
+  }:${config.server.port}`
+);
 server.listen(config.server.port, config.server.host);
