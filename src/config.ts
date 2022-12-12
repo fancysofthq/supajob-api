@@ -6,16 +6,8 @@ class DB {
   constructor(readonly url: URL) {}
 }
 
-class ServerCredentials {
-  constructor(readonly crtPath: string, readonly keyPath: string) {}
-}
-
 class Server {
-  constructor(
-    readonly credentials: ServerCredentials | undefined,
-    readonly host: string,
-    readonly port: number
-  ) {}
+  constructor(readonly host: string, readonly port: number) {}
 }
 
 class Eth {
@@ -41,24 +33,9 @@ function requireEnv(id: string): string {
   else throw `Missing env var ${id}`;
 }
 
-let credentials: ServerCredentials | undefined = undefined;
-
-if (process.env.SERVER_CRT && process.env.SERVER_KEY) {
-  credentials = new ServerCredentials(
-    process.env.SERVER_CRT,
-    process.env.SERVER_KEY
-  );
-} else {
-  console.warn("Server credentials not configured, running in insecure mode");
-}
-
 const config = new Config(
   new DB(new URL(requireEnv("DATABASE_URL"))),
-  new Server(
-    credentials,
-    requireEnv("SERVER_HOST"),
-    parseInt(requireEnv("SERVER_PORT"))
-  ),
+  new Server(requireEnv("SERVER_HOST"), parseInt(requireEnv("SERVER_PORT"))),
   requireEnv("JWT_SECRET"),
   requireEnv("WEB3_STORAGE_TOKEN"),
   new Eth(
