@@ -3,7 +3,7 @@ import Database from "better-sqlite3";
 
 export function open(trace: boolean = false) {
   const path = config.db.url.host + config.db.url.pathname;
-  console.debug("Opening database connection", path);
+  if (trace) console.debug("Opening database connection", path);
 
   const db = new Database(path, {
     fileMustExist: true,
