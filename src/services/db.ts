@@ -6,7 +6,6 @@ export function open(trace: boolean = false) {
   if (trace) console.debug("Opening database connection", path);
 
   const db = new Database(path, {
-    fileMustExist: true,
     verbose: trace ? console.log : undefined,
   });
 
