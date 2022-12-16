@@ -6,5 +6,8 @@ let cancel = false;
 
 sync(() => cancel);
 
-console.log(`Listening at http://${config.server.host}:${config.server.port}`);
-server.listen(config.server.port, config.server.host);
+server.listen(config.server.port, config.server.host, () => {
+  console.log(
+    `Listening at http://${config.server.host}:${config.server.port}`
+  );
+});
