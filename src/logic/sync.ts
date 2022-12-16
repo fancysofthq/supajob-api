@@ -6,14 +6,9 @@ import { Transfer } from "@/models/JobBoard/events/Transfer.js";
 import { Mint } from "@/models/JobBoard/events/Mint.js";
 import { MintFresh } from "@/models/JobBoard/events/MintFresh.js";
 import * as db from "@/services/db.js";
-import { timeout } from "@/utils.js";
+import { provider } from "@/services/eth.js";
 
-export async function syncEvents(cancel: () => boolean) {
-  console.log("Connecting to JSON-RPC provider at", config.eth.rpcUrl);
-  const provider = new ethers.providers.JsonRpcProvider(config.eth.rpcUrl);
-  await timeout(1000, provider.ready, "Provider not ready");
-  const blockNumber = await provider.getBlockNumber();
-  console.log("Current block number:", blockNumber);
+export default async function sync(cancel: () => boolean) {
   await Promise.all([syncJobBoard(provider, cancel)]);
 }
 
