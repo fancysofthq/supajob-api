@@ -2,6 +2,7 @@ import { Database } from "better-sqlite3";
 import { ethers } from "ethers";
 import { timer } from "@/utils.js";
 import pRetry, { AbortError } from "p-retry";
+import { getProvider } from "@/services/eth.js";
 
 export async function syncEvents<T>(
   db: Database,
@@ -26,22 +27,13 @@ export async function syncEvents<T>(
       parseRaw,
       insertBulk
     ),
-    subscribeToNewEvents(
-      db,
-      blockColumn,
-      pollCancel,
-      contract,
-      filter,
-      parseRaw,
-      insertBulk
-    ),
   ]);
 }
 
 const BATCH = 240; // Approximately 1 hour.
 
 /**
- * Synchronize past events.
+ * Synchronize past events continuously.
  */
 async function syncPastEvents<T>(
   db: Database,
@@ -65,7 +57,12 @@ async function syncPastEvents<T>(
   while (!pollCancel()) {
     const [latestSyncedBlock, currentBlock] = await Promise.all([
       ((await selectBlockColumnStmt.get()) as number) || contractDeployBlock,
-      await pRetry(() => contract.provider.getBlockNumber()),
+      await pRetry(() => contract.provider.getBlockNumber(), {
+        onFailedAttempt: async (error) => {
+          if (error instanceof AbortError) throw error;
+          await getProvider();
+        },
+      }),
     ]);
 
     const diff = currentBlock - latestSyncedBlock;
@@ -74,8 +71,14 @@ async function syncPastEvents<T>(
     if (delta > 0) {
       const untilBlock = latestSyncedBlock + delta;
 
-      const rawEvents = await pRetry(() =>
-        contract.queryFilter(filter, latestSyncedBlock, untilBlock)
+      const rawEvents = await pRetry(
+        () => contract.queryFilter(filter, latestSyncedBlock, untilBlock),
+        {
+          onFailedAttempt: async (error) => {
+            if (error instanceof AbortError) throw error;
+            await getProvider();
+          },
+        }
       );
 
       const mappedEvents = rawEvents.flatMap(parseRaw);
@@ -95,39 +98,4 @@ async function syncPastEvents<T>(
 
     if (delta == diff) await timer(pollInterval);
   }
-}
-
-/**
- * Subscribe to new events.
- */
-async function subscribeToNewEvents<T>(
-  db: Database,
-  blockColumn: string,
-  cancel: () => boolean,
-  contract: ethers.Contract,
-  filter: ethers.EventFilter,
-  parseRaw: (e: ethers.Event) => T[],
-  insertBulk: (db: Database, events: T[]) => void
-): Promise<void> {
-  const selectBlockColumnStmt = db
-    .prepare(`SELECT ${blockColumn} FROM [state]`)
-    .pluck();
-
-  contract.on(filter, (...data) => {
-    if (cancel()) {
-      contract.removeAllListeners(filter);
-      return;
-    }
-
-    const e: ethers.Event = data[data.length - 1];
-    const latestSyncedBlock = selectBlockColumnStmt.get() as number;
-
-    if (e.blockNumber > latestSyncedBlock) {
-      const mappedEvents = parseRaw(e);
-
-      if (mappedEvents.length > 0) {
-        insertBulk(db, mappedEvents);
-      }
-    }
-  });
 }

@@ -1,21 +1,19 @@
 import config from "../config.js";
-import { ethers } from "ethers";
 import { JobBoardFactory } from "@/contracts/JobBoardFactory.js";
 import * as EventDB from "./EventDB.js";
 import { Transfer } from "@/models/JobBoard/events/Transfer.js";
 import { Mint } from "@/models/JobBoard/events/Mint.js";
 import { MintFresh } from "@/models/JobBoard/events/MintFresh.js";
 import * as db from "@/services/db.js";
-import { provider } from "@/services/eth.js";
+import { getProvider } from "@/services/eth.js";
 
 export default async function sync(cancel: () => boolean) {
-  await Promise.all([syncJobBoard(provider, cancel)]);
+  await Promise.all([syncJobBoard(cancel)]);
 }
 
-export async function syncJobBoard(
-  provider: ethers.providers.JsonRpcProvider,
-  cancel: () => boolean
-) {
+export async function syncJobBoard(cancel: () => boolean) {
+  const provider = await getProvider();
+
   const contract = JobBoardFactory.connect(
     config.eth.jobBoardAddress.toString(),
     provider

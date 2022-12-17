@@ -1,12 +1,19 @@
 import config from "../config.js";
 import { ethers } from "ethers";
 import { timeout } from "@/utils.js";
+import pRetry from "p-retry";
 
 console.log("Connecting to JSON-RPC provider at", config.eth.rpcUrl);
-const provider = new ethers.providers.JsonRpcProvider(config.eth.rpcUrl);
-await timeout(5000, provider.ready, "Provider not ready");
+let provider = new ethers.providers.JsonRpcProvider(config.eth.rpcUrl);
 
-const blockNumber = await provider.getBlockNumber();
-console.log("Current block number:", blockNumber);
+export async function getProvider(): Promise<ethers.providers.JsonRpcProvider> {
+  await pRetry(() => timeout(5000, provider.ready), {
+    onFailedAttempt: (err) => {
+      console.warn(err);
+      console.log("Connecting to JSON-RPC provider at", config.eth.rpcUrl);
+      provider = new ethers.providers.JsonRpcProvider(config.eth.rpcUrl);
+    },
+  });
 
-export { provider };
+  return provider;
+}
