@@ -1,7 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
-  '@fancysoft/contracts': ^0.1.0-rc2
+  '@fancysoft/contracts': ^0.1.0
   '@koa/cors': ^3.3.0
   '@koa/router': ^10.1.1
   '@multiformats/sha3': ^2.0.14
@@ -30,7 +30,7 @@ specifiers:
   web3-token: ^1.0.2
 
 dependencies:
-  '@fancysoft/contracts': 0.1.0-rc2
+  '@fancysoft/contracts': 0.1.0
   '@koa/cors': 3.4.3
   '@koa/router': 10.1.1
   '@multiformats/sha3': 2.0.14
@@ -377,15 +377,15 @@ packages:
       '@ethersproject/strings': 5.7.0
     dev: false
 
-  /@fancysoft/contracts/0.1.0-rc2:
-    resolution: {integrity: sha512-yy7qX01z50rjEa+7idBRNgodkutF6XTAkS+bdSxnTDeKpZYpBWy+gO3JOF3hSb/vL7aScxvMHM5FN4WyV+SH5Q==}
+  /@fancysoft/contracts/0.1.0:
+    resolution: {integrity: sha512-b/JssmvDr/n4uech5WdZSO2EZ9nhSESBlTUbjIIW0Y01seVikzhkW9UKtvJbO1ooHqNztKs1KwdP15ok7558hw==}
     engines: {node: ^18.0}
     dependencies:
       '@ethersproject/abi': 5.7.0
       '@ethersproject/bytes': 5.7.0
       '@ethersproject/contracts': 5.7.0
       '@ethersproject/providers': 5.7.2
-      '@nxsf/ipnft': 0.4.0-rc4
+      '@nxsf/ipnft': 0.4.0
       '@openzeppelin/contracts': 4.8.0
       ethers: 5.7.2
     transitivePeerDependencies:
@@ -441,8 +441,8 @@ packages:
       fastq: 1.14.0
     dev: true
 
-  /@nxsf/ipnft/0.4.0-rc4:
-    resolution: {integrity: sha512-9LLIlNuIh/o17hQCSZtGYZEhy77gDDEVnTGGODALi5ewggg6UZ99bQuLcktQYT0DmiDIAC+wgvu91hOjSgZYFQ==}
+  /@nxsf/ipnft/0.4.0:
+    resolution: {integrity: sha512-ug1pl3gp3SgOLOFFIgFAnNM+NNQlReLw00E4x8p4JThzLfuILDFLeLAlTrT8FSoEPhQbZTI+lGxMLbsAnt10Gw==}
     engines: {node: ^18.0}
     dependencies:
       '@ethersproject/abi': 5.7.0
