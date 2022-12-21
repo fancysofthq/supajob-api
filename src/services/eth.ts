@@ -2,7 +2,7 @@ import config from "../config.js";
 import { ethers } from "ethers";
 import { timeout } from "@/utils.js";
 
-let provider;
+let provider: ethers.providers.BaseProvider;
 
 console.log("Connecting to JSON-RPC provider at", config.eth.rpcUrl);
 if (config.eth.rpcUrl.startsWith("ws")) {
