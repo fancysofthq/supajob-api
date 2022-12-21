@@ -1,5 +1,5 @@
 import * as dotenv from "dotenv";
-import Address from "@/models/address.js";
+import { Address, Hash } from "@/models/Bytes";
 dotenv.config();
 
 class DB {
@@ -13,8 +13,8 @@ class Server {
 class Eth {
   constructor(
     readonly rpcUrl: string,
-    readonly jobBoardAddress: Address,
-    readonly jobBoardTx: string
+    readonly jobContractAddress: Address,
+    readonly jobContractTx: Hash
   ) {}
 }
 
@@ -40,8 +40,8 @@ const config = new Config(
   requireEnv("WEB3_STORAGE_TOKEN"),
   new Eth(
     requireEnv("ETH_RPC_URL"),
-    new Address(requireEnv("ETH_JOB_BOARD_ADDRESS")),
-    requireEnv("ETH_JOB_BOARD_TX")
+    new Address(requireEnv("ETH_JOB_CONTRACT_ADDRESS")),
+    new Hash(requireEnv("ETH_JOB_CONTRACT_TX"))
   )
 );
 

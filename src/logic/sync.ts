@@ -1,75 +1,43 @@
-import config from "../config.js";
-import { JobBoardFactory } from "@/contracts/JobBoardFactory.js";
-import * as EventDB from "./EventDB.js";
-import { Transfer } from "@/models/JobBoard/events/Transfer.js";
-import { Mint } from "@/models/JobBoard/events/Mint.js";
-import { MintFresh } from "@/models/JobBoard/events/MintFresh.js";
-import * as db from "@/services/db.js";
-import { getProvider } from "@/services/eth.js";
+import db from "@/services/db";
+import { Job } from "@/shared/sync";
+import * as syncjobs from "@/models/syncjobs";
+import config from "@/config";
 
-export default async function sync(cancel: () => boolean) {
-  await Promise.all([syncJobBoard(cancel)]);
+export async function runSyncJobs(cancel: () => boolean) {
+  await Promise.all(
+    [
+      initSyncJob(syncjobs.IIPNFTClaimJob, {
+        contractAddress: config.eth.jobContractAddress,
+        contractDeployTx: config.eth.jobContractTx,
+      }),
+      initSyncJob(syncjobs.IERC721TransferJob, {
+        contractAddress: config.eth.jobContractAddress,
+        contractDeployTx: config.eth.jobContractTx,
+      }),
+    ].map((job) => job.run(cancel))
+  );
 }
 
-export async function syncJobBoard(cancel: () => boolean) {
-  const provider = await getProvider();
+const insertStmt = db.prepare(
+  `INSERT INTO sync_jobs (
+    event_table,
+    contract_address,
+    contract_deploy_tx_hash
+  ) VALUES (?, ?, ?)
+  ON CONFLICT DO NOTHING`
+);
 
-  const contract = JobBoardFactory.connect(
-    config.eth.jobBoardAddress.toString(),
-    provider
+function initSyncJob<T extends Job>(
+  type: { new (dto: syncjobs.Config): T },
+  config: syncjobs.Config
+): T {
+  const obj = new type(config);
+
+  insertStmt.run(
+    obj.eventTable,
+    config.contractAddress.bytes,
+    config.contractDeployTx.bytes
   );
 
-  const deployBlock = (await provider.getTransaction(config.eth.jobBoardTx))
-    .blockNumber;
-  if (!deployBlock) throw new Error("JobBoard deploy block not found");
-
-  await Promise.all([
-    EventDB.syncEvents<Transfer>(
-      db.open(),
-      Transfer.BLOCK_SINGLE_COLUMN,
-      15 * 1000,
-      cancel,
-      contract,
-      deployBlock,
-      contract.filters.TransferSingle(null, null, null, null, null),
-      Transfer.parseTransferSingle,
-      Transfer.insertBulk
-    ),
-
-    EventDB.syncEvents<Transfer>(
-      db.open(),
-      Transfer.BLOCK_BATCH_COLUMN,
-      15 * 1000,
-      cancel,
-      contract,
-      deployBlock,
-      contract.filters.TransferBatch(null, null, null, null, null),
-      Transfer.parseTransferBatch,
-      Transfer.insertBulk
-    ),
-
-    EventDB.syncEvents<Mint>(
-      db.open(),
-      Mint.BLOCK_COLUMN,
-      15 * 1000,
-      cancel,
-      contract,
-      deployBlock,
-      contract.filters.Mint(null, null),
-      Mint.parse,
-      Mint.insertBulk
-    ),
-
-    EventDB.syncEvents<MintFresh>(
-      db.open(),
-      MintFresh.BLOCK_COLUMN,
-      15 * 1000,
-      cancel,
-      contract,
-      deployBlock,
-      contract.filters.MintFresh(null, null, null, null),
-      MintFresh.parse,
-      MintFresh.insertBulk
-    ),
-  ]);
+  return obj;
 }

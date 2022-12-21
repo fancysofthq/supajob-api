@@ -2,7 +2,7 @@ import jsonwebtoken from "jsonwebtoken";
 import Router from "@koa/router";
 import config from "@/config.js";
 import koa from "koa";
-import Account from "@/models/address.js";
+import { Address } from "@/models/Bytes";
 
 // TODO: Replace with a home-grown solution.
 import Web3Token from "web3-token";
@@ -51,11 +51,11 @@ export async function authenticate(
  */
 export async function authorize(
   ctx: koa.Context,
-  account: Account
+  address: Address
 ): Promise<AppJWT> {
   const jwt = await authenticate(ctx);
   if (!jwt) ctx.throw(401, "Missing JWT");
-  if (jwt.payload.addr.toLowerCase() != account.toString().toLowerCase())
+  if (jwt.payload.addr.toLowerCase() != address.toString().toLowerCase())
     return ctx.throw(403);
   return jwt;
 }

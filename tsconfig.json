@@ -4,7 +4,7 @@
     "esModuleInterop": true,
     "target": "ESNext",
     "strict": true,
-    "moduleResolution": "NodeNext",
+    "moduleResolution": "Node",
     "outDir": "dist",
     "lib": ["ESNext"],
     "strictFunctionTypes": false,
@@ -14,7 +14,8 @@
     "paths": {
       "@/*": ["src/*"]
     },
+    "forceConsistentCasingInFileNames": true,
     "typeRoots": ["node_modules/@types", "src/@types"]
   },
-  "include": ["src"]
+  "include": ["scripts", "src"]
 }

@@ -1,10 +1,10 @@
 import Router from "@koa/router";
 import db from "@/services/db.js";
-import { MintFresh } from "@/models/JobBoard/events/MintFresh.js";
 import { CID } from "multiformats/cid";
 import { digest } from "multiformats";
 import { keccak256 } from "@multiformats/sha3";
-import Address from "@/models/address.js";
+import { Address, Bytes } from "@/models/Bytes.js";
+import config from "@/config";
 
 type Job = {
   cid: CID;
@@ -32,20 +32,21 @@ export default function setupJobsController(router: Router) {
       const author = new Address(ctx.query.from as string);
 
       db.prepare(
-        `SELECT id, codec, author, block_number
-        FROM ${MintFresh.TABLE}
-        WHERE author = ?
-        ORDER BY block_number DESC`
+        `SELECT
+          block_number,
+          content_id,
+          content_codec
+        FROM iipnft_claim
+        WHERE
+          contract_address = ? AND
+          content_author = ?`
       )
-        .all(author.toString())
+        .all(config.eth.jobContractAddress.bytes, author.bytes)
         .forEach((row) => {
           jobs.push({
             cid: CID.createV1(
-              row.codec as number,
-              digest.create(
-                keccak256.code,
-                Buffer.from(row["id"].slice(2), "hex")
-              )
+              row.content_codec as number,
+              digest.create(keccak256.code, new Bytes(row.content_id).bytes)
             ),
             author,
             block: row.block_number,
@@ -53,21 +54,22 @@ export default function setupJobsController(router: Router) {
         });
     } else {
       db.prepare(
-        `SELECT id, codec, author, block_number
-      FROM ${MintFresh.TABLE}
-      ORDER BY block_number DESC`
+        `SELECT
+          block_number,
+          content_id,
+          content_codec,
+          content_author
+        FROM iipnft_claim
+        WHERE contract_address = ?`
       )
-        .all()
+        .all(config.eth.jobContractAddress.bytes)
         .forEach((row) => {
           jobs.push({
             cid: CID.createV1(
-              row.codec as number,
-              digest.create(
-                keccak256.code,
-                Buffer.from(row["id"].slice(2), "hex")
-              )
+              row.content_codec as number,
+              digest.create(keccak256.code, new Bytes(row.content_id).bytes)
             ),
-            author: new Address(row.author),
+            author: new Address(row.content_author),
             block: row.block_number,
           });
         });
@@ -84,17 +86,17 @@ export default function setupJobsController(router: Router) {
     next();
   });
 
-  // Get a job by CID.
+  // Get a job by its CID.
   router.get("/v1/jobs/:cid", async (ctx, next) => {
     const cid = CID.parse(ctx.params.cid);
 
     const row = db
       .prepare(
-        `SELECT id, codec, author, block_number
-        FROM ${MintFresh.TABLE}
-        WHERE id = ?`
+        `SELECT block_number, content_author
+        FROM iipnft_claim
+        WHERE content_id = ?`
       )
-      .get("0x" + Buffer.from(cid.multihash.digest).toString("hex"));
+      .get(new Bytes(cid.multihash.digest).bytes);
 
     if (!row) {
       ctx.status = 404;
@@ -103,7 +105,7 @@ export default function setupJobsController(router: Router) {
 
     const job: Job = {
       cid,
-      author: new Address(row.author),
+      author: new Address(row.content_author),
       block: row.block_number,
     };
 

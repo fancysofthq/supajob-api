@@ -1,10 +1,8 @@
-import server from "./server/index.js";
-import sync from "./logic/sync.js";
-import config from "./config.js";
+import server from "./server";
+import config from "./config";
+import { runSyncJobs } from "./logic/sync";
 
-let cancel = false;
-
-sync(() => cancel);
+runSyncJobs(() => false);
 
 server.listen(config.server.port, config.server.host, () => {
   console.log(
