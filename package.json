@@ -1,6 +1,6 @@
 {
   "name": "supajob-api",
-  "version": "0.2.1-rc2",
+  "version": "0.2.1",
   "description": "API for the SupaJob application",
   "author": {
     "name": "Fancy Software",
