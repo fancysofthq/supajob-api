@@ -97,9 +97,17 @@ async function syncHistorical(
   let to = Math.min(from + BATCH_SIZE, currentBlock);
 
   while (from < to) {
+    console.debug("Syncing", contract.address, "for", eventTable, from, to);
     const events = await pRetry(() => contract.queryFilter(filter, from, to));
 
     db.transaction(() => {
+      console.debug(
+        "(Historical) Inserting",
+        events.length,
+        "events to",
+        eventTable
+      );
+
       insert(db, events);
       setHistoricalBlockStmt.run(to);
     })();
@@ -146,6 +154,8 @@ async function syncRealtime(
         console.warn("Received event from past block", e);
         return;
       }
+
+      console.debug("(Realtime) Inserting to", eventTable);
 
       insert(db, [e]);
       setRealtimeBlockStmt.run(e.blockNumber);
