@@ -5,18 +5,7 @@ import { digest } from "multiformats";
 import { keccak256 } from "@multiformats/sha3";
 import { Address, Bytes } from "@fancysofthq/supabase";
 import config from "@/config";
-
-type Job = {
-  cid: CID;
-  author: Address;
-  block: number;
-};
-
-type JobDto = {
-  cid: string;
-  author: string;
-  block: number;
-};
+import { Job } from "../types";
 
 export default function setupJobsController(router: Router) {
   // Get all jobs.
@@ -43,14 +32,16 @@ export default function setupJobsController(router: Router) {
       )
         .all(config.eth.jobContractAddress.bytes, author.bytes)
         .forEach((row) => {
-          jobs.push({
-            cid: CID.createV1(
-              row.content_codec as number,
-              digest.create(keccak256.code, Bytes.from(row.content_id).bytes)
-            ),
-            author,
-            block: row.block_number,
-          });
+          jobs.push(
+            new Job(
+              CID.createV1(
+                row.content_codec as number,
+                digest.create(keccak256.code, Bytes.from(row.content_id).bytes)
+              ),
+              author,
+              row.block_number
+            )
+          );
         });
     } else {
       db.prepare(
@@ -64,24 +55,20 @@ export default function setupJobsController(router: Router) {
       )
         .all(config.eth.jobContractAddress.bytes)
         .forEach((row) => {
-          jobs.push({
-            cid: CID.createV1(
-              row.content_codec as number,
-              digest.create(keccak256.code, Bytes.from(row.content_id).bytes)
-            ),
-            author: Address.from(row.content_author),
-            block: row.block_number,
-          });
+          jobs.push(
+            new Job(
+              CID.createV1(
+                row.content_codec as number,
+                digest.create(keccak256.code, Bytes.from(row.content_id).bytes)
+              ),
+              Address.from(row.content_author),
+              row.block_number
+            )
+          );
         });
     }
 
-    ctx.body = jobs.map(
-      (job): JobDto => ({
-        cid: job.cid.toString(),
-        author: job.author.toString(),
-        block: job.block,
-      })
-    );
+    ctx.body = jobs.map((job) => job.toJSON());
 
     next();
   });
@@ -103,18 +90,10 @@ export default function setupJobsController(router: Router) {
       return;
     }
 
-    const job: Job = {
+    ctx.body = new Job(
       cid,
-      author: Address.from(row.content_author),
-      block: row.block_number,
-    };
-
-    const jobDto: JobDto = {
-      cid: job.cid.toString(),
-      author: job.author.toString(),
-      block: job.block,
-    };
-
-    ctx.body = jobDto;
+      Address.from(row.content_author),
+      row.block_number
+    ).toJSON();
   });
 }
