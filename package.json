@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@fancysoft/contracts": "^0.1.0",
+    "@fancysofthq/supabase": "^0.4.0",
     "@koa/cors": "^3.3.0",
     "@koa/router": "^10.1.1",
     "@multiformats/sha3": "^2.0.14",

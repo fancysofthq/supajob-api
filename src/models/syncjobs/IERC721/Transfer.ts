@@ -2,7 +2,7 @@ import { IERC721__factory } from "@fancysoft/contracts/typechain";
 import { TransferEvent } from "@fancysoft/contracts/typechain/@openzeppelin/contracts/token/ERC721/IERC721";
 import db from "@/services/db";
 import { provider } from "@/services/eth";
-import { Address, Bytes, Hash } from "@/models/Bytes";
+import { Address, Bytes, Hash } from "@fancysofthq/supabase";
 import { sync, Job } from "@/shared/sync";
 import { Config } from "../Config";
 
@@ -46,12 +46,12 @@ export class IERC721TransferJob implements Job {
           stmt.run(
             event.blockNumber,
             event.logIndex,
-            new Hash(event.transactionHash).bytes,
-            new Address(event.address).bytes,
+            Hash.from(event.transactionHash).bytes,
+            Address.from(event.address).bytes,
 
-            new Address(event.args.from).bytes,
-            new Address(event.args.to).bytes,
-            new Bytes(event.args.tokenId._hex).bytes
+            Address.from(event.args.from).bytes,
+            Address.from(event.args.to).bytes,
+            Bytes.from(event.args.tokenId._hex).bytes
           );
         }
       },

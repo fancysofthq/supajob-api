@@ -3,7 +3,7 @@ import db from "@/services/db.js";
 import { CID } from "multiformats/cid";
 import { digest } from "multiformats";
 import { keccak256 } from "@multiformats/sha3";
-import { Address, Bytes } from "@/models/Bytes.js";
+import { Address, Bytes } from "@fancysofthq/supabase";
 import config from "@/config";
 
 type Job = {
@@ -29,7 +29,7 @@ export default function setupJobsController(router: Router) {
         ctx.throw(400, "from must be a string");
       }
 
-      const author = new Address(ctx.query.from as string);
+      const author = Address.from(ctx.query.from as string);
 
       db.prepare(
         `SELECT
@@ -46,7 +46,7 @@ export default function setupJobsController(router: Router) {
           jobs.push({
             cid: CID.createV1(
               row.content_codec as number,
-              digest.create(keccak256.code, new Bytes(row.content_id).bytes)
+              digest.create(keccak256.code, Bytes.from(row.content_id).bytes)
             ),
             author,
             block: row.block_number,
@@ -67,9 +67,9 @@ export default function setupJobsController(router: Router) {
           jobs.push({
             cid: CID.createV1(
               row.content_codec as number,
-              digest.create(keccak256.code, new Bytes(row.content_id).bytes)
+              digest.create(keccak256.code, Bytes.from(row.content_id).bytes)
             ),
-            author: new Address(row.content_author),
+            author: Address.from(row.content_author),
             block: row.block_number,
           });
         });
@@ -96,7 +96,7 @@ export default function setupJobsController(router: Router) {
         FROM iipnft_claim
         WHERE content_id = ?`
       )
-      .get(new Bytes(cid.multihash.digest).bytes);
+      .get(Bytes.from(cid.multihash.digest).bytes);
 
     if (!row) {
       ctx.status = 404;
@@ -105,7 +105,7 @@ export default function setupJobsController(router: Router) {
 
     const job: Job = {
       cid,
-      author: new Address(row.content_author),
+      author: Address.from(row.content_author),
       block: row.block_number,
     };
 

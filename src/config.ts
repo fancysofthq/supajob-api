@@ -1,5 +1,5 @@
 import * as dotenv from "dotenv";
-import { Address, Hash } from "@/models/Bytes";
+import { Address, Hash } from "@fancysofthq/supabase";
 dotenv.config();
 
 class DB {
@@ -40,8 +40,8 @@ const config = new Config(
   requireEnv("WEB3_STORAGE_TOKEN"),
   new Eth(
     requireEnv("ETH_RPC_URL"),
-    new Address(requireEnv("ETH_JOB_CONTRACT_ADDRESS")),
-    new Hash(requireEnv("ETH_JOB_CONTRACT_TX"))
+    Address.from(requireEnv("ETH_JOB_CONTRACT_ADDRESS")),
+    Hash.from(requireEnv("ETH_JOB_CONTRACT_TX"))
   )
 );
 
